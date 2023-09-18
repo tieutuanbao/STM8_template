@@ -1,0 +1,15 @@
+{
+  "workspace": {
+    "path": "${workspaceFolder}/IAR/StairLighting-Key.eww"
+  },
+  "workspaces": {
+    "${workspaceFolder}/IAR/StairLighting-Key.eww": {
+      "configs": {
+        "${workspaceFolder}/IAR/StairLighting-Key.ewp": "Debug"
+      },
+      "selected": {
+        "path": "${workspaceFolder}/IAR/StairLighting-Key.ewp"
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "stm8-debug",
+            "request": "launch",
+            "name": "launch",
+            "serverType": "stm8-sdcc",
+            "executable": ".\\led_control.elf",
+            "port": "3333",
+            "openOcdConfigs": [
+                "interface/stlink-dap.cfg",
+                "target/stm8s.cfg"
+            ],
+            "svdFile": "stm8s003.svd.json"
+        }
+    ]
+}

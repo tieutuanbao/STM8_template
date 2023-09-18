@@ -1,0 +1,217 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ANSI-C Compiler
+                                      3 ; Version 4.0.0 #11528 (Linux)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module main
+                                      6 	.optsdcc -mstm8
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _main
+                                     12 	.globl _delay
+                                     13 	.globl _delayMicroseconds
+                                     14 	.globl _Clk_Init
+                                     15 	.globl _LedControl_Init
+                                     16 	.globl _CLK_HSIPrescalerConfig
+                                     17 ;--------------------------------------------------------
+                                     18 ; ram data
+                                     19 ;--------------------------------------------------------
+                                     20 	.area DATA
+                                     21 ;--------------------------------------------------------
+                                     22 ; ram data
+                                     23 ;--------------------------------------------------------
+                                     24 	.area INITIALIZED
+                                     25 ;--------------------------------------------------------
+                                     26 ; Stack segment in internal ram 
+                                     27 ;--------------------------------------------------------
+                                     28 	.area	SSEG
+      000000                         29 __start__stack:
+      000000                         30 	.ds	1
+                                     31 
+                                     32 ;--------------------------------------------------------
+                                     33 ; absolute external ram data
+                                     34 ;--------------------------------------------------------
+                                     35 	.area DABS (ABS)
+                                     36 
+                                     37 ; default segment ordering for linker
+                                     38 	.area HOME
+                                     39 	.area GSINIT
+                                     40 	.area GSFINAL
+                                     41 	.area CONST
+                                     42 	.area INITIALIZER
+                                     43 	.area CODE
+                                     44 
+                                     45 ;--------------------------------------------------------
+                                     46 ; interrupt vector 
+                                     47 ;--------------------------------------------------------
+                                     48 	.area HOME
+      000000                         49 __interrupt_vect:
+      000000 82v00u00u00             50 	int s_GSINIT ; reset
+                                     51 ;--------------------------------------------------------
+                                     52 ; global & static initialisations
+                                     53 ;--------------------------------------------------------
+                                     54 	.area HOME
+                                     55 	.area GSINIT
+                                     56 	.area GSFINAL
+                                     57 	.area GSINIT
+      000000                         58 __sdcc_gs_init_startup:
+      000000                         59 __sdcc_init_data:
+                                     60 ; stm8_genXINIT() start
+      000000 AEr00r00         [ 2]   61 	ldw x, #l_DATA
+      000003 27 07            [ 1]   62 	jreq	00002$
+      000005                         63 00001$:
+      000005 72 4FuFFuFF      [ 1]   64 	clr (s_DATA - 1, x)
+      000009 5A               [ 2]   65 	decw x
+      00000A 26 F9            [ 1]   66 	jrne	00001$
+      00000C                         67 00002$:
+      00000C AEr00r00         [ 2]   68 	ldw	x, #l_INITIALIZER
+      00000F 27 09            [ 1]   69 	jreq	00004$
+      000011                         70 00003$:
+      000011 D6uFFuFF         [ 1]   71 	ld	a, (s_INITIALIZER - 1, x)
+      000014 D7uFFuFF         [ 1]   72 	ld	(s_INITIALIZED - 1, x), a
+      000017 5A               [ 2]   73 	decw	x
+      000018 26 F7            [ 1]   74 	jrne	00003$
+      00001A                         75 00004$:
+                                     76 ; stm8_genXINIT() end
+                                     77 	.area GSFINAL
+      000000 CCr00r04         [ 2]   78 	jp	__sdcc_program_startup
+                                     79 ;--------------------------------------------------------
+                                     80 ; Home
+                                     81 ;--------------------------------------------------------
+                                     82 	.area HOME
+                                     83 	.area HOME
+      000004                         84 __sdcc_program_startup:
+      000004 CCr00r6B         [ 2]   85 	jp	_main
+                                     86 ;	return from main will return to caller
+                                     87 ;--------------------------------------------------------
+                                     88 ; code
+                                     89 ;--------------------------------------------------------
+                                     90 	.area CODE
+                                     91 ;	source/main.c: 6: void Clk_Init() {
+                                     92 ;	-----------------------------------------
+                                     93 ;	 function Clk_Init
+                                     94 ;	-----------------------------------------
+      000000                         95 _Clk_Init:
+                                     96 ;	source/main.c: 7: CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);
+      000000 4B 00            [ 1]   97 	push	#0x00
+      000002 CDr00r00         [ 4]   98 	call	_CLK_HSIPrescalerConfig
+      000005 84               [ 1]   99 	pop	a
+                                    100 ;	source/main.c: 8: }
+      000006 81               [ 4]  101 	ret
+                                    102 ;	source/main.c: 10: void delayMicroseconds(uint32_t us) {
+                                    103 ;	-----------------------------------------
+                                    104 ;	 function delayMicroseconds
+                                    105 ;	-----------------------------------------
+      000007                        106 _delayMicroseconds:
+      000007 52 08            [ 2]  107 	sub	sp, #8
+                                    108 ;	source/main.c: 11: while(us--) {
+      000009 16 0D            [ 2]  109 	ldw	y, (0x0d, sp)
+      00000B 17 07            [ 2]  110 	ldw	(0x07, sp), y
+      00000D 1E 0B            [ 2]  111 	ldw	x, (0x0b, sp)
+      00000F                        112 00101$:
+      00000F 1F 01            [ 2]  113 	ldw	(0x01, sp), x
+      000011 7B 07            [ 1]  114 	ld	a, (0x07, sp)
+      000013 6B 03            [ 1]  115 	ld	(0x03, sp), a
+      000015 7B 08            [ 1]  116 	ld	a, (0x08, sp)
+      000017 16 07            [ 2]  117 	ldw	y, (0x07, sp)
+      000019 72 A2 00 01      [ 2]  118 	subw	y, #0x0001
+      00001D 17 07            [ 2]  119 	ldw	(0x07, sp), y
+      00001F 24 01            [ 1]  120 	jrnc	00117$
+      000021 5A               [ 2]  121 	decw	x
+      000022                        122 00117$:
+      000022 4D               [ 1]  123 	tnz	a
+      000023 26 08            [ 1]  124 	jrne	00118$
+      000025 16 02            [ 2]  125 	ldw	y, (0x02, sp)
+      000027 26 04            [ 1]  126 	jrne	00118$
+      000029 0D 01            [ 1]  127 	tnz	(0x01, sp)
+      00002B 27 06            [ 1]  128 	jreq	00104$
+      00002D                        129 00118$:
+                                    130 ;	source/main.c: 12: nop();
+      00002D 9D               [ 1]  131 	nop
+                                    132 ;	source/main.c: 13: nop();
+      00002E 9D               [ 1]  133 	nop
+                                    134 ;	source/main.c: 14: nop();
+      00002F 9D               [ 1]  135 	nop
+                                    136 ;	source/main.c: 15: nop();
+      000030 9D               [ 1]  137 	nop
+      000031 20 DC            [ 2]  138 	jra	00101$
+      000033                        139 00104$:
+                                    140 ;	source/main.c: 17: }
+      000033 5B 08            [ 2]  141 	addw	sp, #8
+      000035 81               [ 4]  142 	ret
+                                    143 ;	source/main.c: 19: void delay(uint32_t ms) {
+                                    144 ;	-----------------------------------------
+                                    145 ;	 function delay
+                                    146 ;	-----------------------------------------
+      000036                        147 _delay:
+      000036 52 08            [ 2]  148 	sub	sp, #8
+                                    149 ;	source/main.c: 20: while(ms--) {
+      000038 16 0D            [ 2]  150 	ldw	y, (0x0d, sp)
+      00003A 17 07            [ 2]  151 	ldw	(0x07, sp), y
+      00003C 1E 0B            [ 2]  152 	ldw	x, (0x0b, sp)
+      00003E                        153 00101$:
+      00003E 1F 01            [ 2]  154 	ldw	(0x01, sp), x
+      000040 16 07            [ 2]  155 	ldw	y, (0x07, sp)
+      000042 17 03            [ 2]  156 	ldw	(0x03, sp), y
+      000044 16 07            [ 2]  157 	ldw	y, (0x07, sp)
+      000046 72 A2 00 01      [ 2]  158 	subw	y, #0x0001
+      00004A 17 07            [ 2]  159 	ldw	(0x07, sp), y
+      00004C 24 01            [ 1]  160 	jrnc	00117$
+      00004E 5A               [ 2]  161 	decw	x
+      00004F                        162 00117$:
+      00004F 16 03            [ 2]  163 	ldw	y, (0x03, sp)
+      000051 26 04            [ 1]  164 	jrne	00118$
+      000053 16 01            [ 2]  165 	ldw	y, (0x01, sp)
+      000055 27 11            [ 1]  166 	jreq	00104$
+      000057                        167 00118$:
+                                    168 ;	source/main.c: 21: delayMicroseconds(1000);
+      000057 89               [ 2]  169 	pushw	x
+      000058 4B E8            [ 1]  170 	push	#0xe8
+      00005A 4B 03            [ 1]  171 	push	#0x03
+      00005C 4B 00            [ 1]  172 	push	#0x00
+      00005E 4B 00            [ 1]  173 	push	#0x00
+      000060 CDr00r07         [ 4]  174 	call	_delayMicroseconds
+      000063 5B 04            [ 2]  175 	addw	sp, #4
+      000065 85               [ 2]  176 	popw	x
+      000066 20 D6            [ 2]  177 	jra	00101$
+      000068                        178 00104$:
+                                    179 ;	source/main.c: 23: }
+      000068 5B 08            [ 2]  180 	addw	sp, #8
+      00006A 81               [ 4]  181 	ret
+                                    182 ;	source/main.c: 25: int main() {
+                                    183 ;	-----------------------------------------
+                                    184 ;	 function main
+                                    185 ;	-----------------------------------------
+      00006B                        186 _main:
+                                    187 ;	source/main.c: 26: Clk_Init();
+      00006B CDr00r00         [ 4]  188 	call	_Clk_Init
+                                    189 ;	source/main.c: 27: LedControl_Init();
+      00006E CDr00r00         [ 4]  190 	call	_LedControl_Init
+                                    191 ;	source/main.c: 28: enableInterrupts();
+      000071 9A               [ 1]  192 	rim
+                                    193 ;	source/main.c: 30: for(uint8_t indexLed = 0; indexLed < 28; indexLed++) {
+      000072 4F               [ 1]  194 	clr	a
+      000073                        195 00106$:
+      000073 A1 1C            [ 1]  196 	cp	a, #0x1c
+      000075 24 0D            [ 1]  197 	jrnc	00103$
+                                    198 ;	source/main.c: 31: ledBrightness[indexLed] = 10;
+      000077 5F               [ 1]  199 	clrw	x
+      000078 97               [ 1]  200 	ld	xl, a
+      000079 1Cr00r00         [ 2]  201 	addw	x, #(_ledBrightness + 0)
+      00007C 88               [ 1]  202 	push	a
+      00007D A6 0A            [ 1]  203 	ld	a, #0x0a
+      00007F F7               [ 1]  204 	ld	(x), a
+      000080 84               [ 1]  205 	pop	a
+                                    206 ;	source/main.c: 30: for(uint8_t indexLed = 0; indexLed < 28; indexLed++) {
+      000081 4C               [ 1]  207 	inc	a
+      000082 20 EF            [ 2]  208 	jra	00106$
+                                    209 ;	source/main.c: 33: while(1) {
+      000084                        210 00103$:
+      000084 20 FE            [ 2]  211 	jra	00103$
+                                    212 ;	source/main.c: 35: }
+      000086 81               [ 4]  213 	ret
+                                    214 	.area CODE
+                                    215 	.area CONST
+                                    216 	.area INITIALIZER
+                                    217 	.area CABS (ABS)
